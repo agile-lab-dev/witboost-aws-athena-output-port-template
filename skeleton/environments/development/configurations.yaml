@@ -1,0 +1,9 @@
+{% set dataProductMajorVersion = values.identifier.split(".")[2] %}
+{% set dataProductName = values.dataproduct.split(".")[1] | replace(" ", "") | replace("-", "") %}
+{% set domainName = values.domain.split(":")[1] | replace(" ", "") | replace("-", "") %}
+
+specific:
+  sourceTable:
+    database: ${{ domainName }}_development_${{ dataProductName }}_v${{ dataProductMajorVersion }}_internal
+  view:
+    database: ${{ domainName }}_development_${{ dataProductName }}_v${{ dataProductMajorVersion }}_consumable
