@@ -1,0 +1,366 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: outputport-athena
+  title: Athena Output Port
+  description: Create an Athena View
+  tags:
+    - output-port
+    - aws
+    - athena
+  mesh:
+    icon: https://icon.icepanel.io/AWS/svg/Analytics/Athena.svg
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  generates: componenttype:default/outputport
+  owner: agilelab
+  type: outputport
+  parameters:
+    - title: AWS Athena Output Port
+      description: |-
+        This template allows you to create an Athena View from a specified source table. The schema is defined in the data contract to structure the data representation.
+        
+        After creation you can use the Editor Wizard to customize the component and add more details to the Output Port
+    - title: Component metadata
+      description: Basic information for this component.
+      required:
+        - name
+        - domain
+        - dataproduct
+        - description
+        - storageArea
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Required name used for display purposes
+          ui:field: EntityNamePicker
+          default: Output Port
+          ui:options:
+            allowArbitraryValues: true
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this Output Port is for
+          default: Output Port that exposes information of this Data Product to users and other data products.
+        domain:
+          title: Domain
+          type: string
+          description: Domain of the Data Product this Output Port belongs to
+          ui:field: EntityPicker
+          ui:options:
+            allowArbitraryValues: false
+            allowedKinds:
+              - Domain
+        dataproduct:
+          title: Data Product
+          type: string
+          description: Data Product this Output Port belongs to
+          ui:field: EntityPicker
+          ui:filter:
+            - fieldName: domain
+              entityPath: spec.domain
+          ui:options:
+            allowArbitraryValues: false
+            allowedKinds:
+              - System
+        identifier:
+          title: Identifier
+          type: string
+          description: A unique identifier for the entity inside the domain. It will not be editable after creation and is expected to be a string that is sequences of [a-zA-Z] separated by any of [-_]
+          ui:field: ComponentIdentifierPicker
+          ui:options:
+            allowArbitraryValues: false
+        developmentGroup:
+          title: Development Group
+          type: string
+          description: Data Product development group
+          ui:field: EntitySelectionPicker
+          ui:fieldName: dataproduct
+          ui:property: spec.owner
+          ui:options:
+            allowArbitraryValues: false
+        storageArea:
+          title: Storage component dependency
+          description: AWS Athena output port component must depend on a S3 Storage area component used as query output location
+          type: string
+          ui:field: EntityRelationsPicker
+          ui:fieldName: dataproduct
+          relation: hasPart
+          ui:filters:
+            - key: spec.mesh.useCaseTemplateId
+              value: "urn:dmb:utm:aws-s3-template:0.0.0"
+        dependsOn:
+          title: Depends on
+          type: array
+          default: []
+          items:
+            type: string
+            ui:field: EntityRelationsPicker
+            ui:fieldName: dataproduct
+            relation: hasPart
+          description: An Output Port could depend on other components in the same Data Product. This information will be used to deploy the components in such an order that their dependencies already exist.
+        domainName:
+          type: string
+          ui:field: EntitySelectionPicker
+          ui:fieldName: domain
+          ui:property: spec.mesh.name
+          ui:options:
+            allowArbitraryValues: false
+          ui:widget: hidden
+        dataproductName:
+          type: string
+          ui:field: EntitySelectionPicker
+          ui:fieldName: dataproduct
+          ui:property: spec.mesh.name
+          ui:options:
+            allowArbitraryValues: false
+          ui:widget: hidden
+
+    - title: Data contract schema
+      description: |-
+      
+        Define the schema of the Output Port view. Primitive data types supported.
+
+        The **Data Contract** schema specifies the structure of the data that will be exposed through the Output Port.  
+        This schema will serve two purposes:
+        
+        1. **Athena View Generation**: The Output Port will create an Athena view with the exact columns defined in this schema. If no columns are defined the view will include all the columns of the source table.
+        2. **Source Table Creation (if needed)**: If the source table does not exist in the source database, it will be automatically created using this schema.
+
+        The Data Contract ensures consistency and enforces a predefined structure.
+
+        You can modify the Data Contract later in the **Edit** section.
+      properties:
+        schemaDefinition:
+          type: object
+          ui:options:
+            displayTitle: false
+          properties:
+            schemaColumns:
+              title: Column Definitions
+              type: array
+              ui:ArrayFieldTemplate: ArrayTableTemplate
+              items:
+                type: object
+                ui:ObjectFieldTemplate: TableRowTemplate
+                required:
+                  - name
+                  - dataType
+                properties:
+                  name:
+                    type: string
+                    title: Name
+                  description:
+                    type: string
+                    title: Description
+                  dataType:
+                    type: string
+                    default: INT
+                    title: Data Type
+                    enum:
+                      - TINYINT
+                      - SMALLINT
+                      - INT
+                      - BIGINT
+                      - DOUBLE
+                      - DECIMAL
+                      - TIMESTAMP
+                      - DATE
+                      - STRING
+                      - CHAR
+                      - VARCHAR
+                      - BOOLEAN
+                      - ARRAY
+                  constraint:
+                    type: string
+                    title: Constraint
+                    default: (no constraint)
+                    enum:
+                      - PRIMARY_KEY
+                      - NOT_NULL
+                      - UNIQUE
+                      - (no constraint)
+                allOf:
+                  - if:
+                      properties:
+                        dataType:
+                          const: ARRAY
+                    then:
+                      required:
+                        - arrayDataType
+                      properties:
+                        arrayDataType:
+                          title: Array Data Type
+                          description: Data type of the array elements
+                          type: string
+                          default: INT
+                          enum:
+                            - TINYINT
+                            - SMALLINT
+                            - INT
+                            - BIGINT
+                            - DOUBLE
+                            - DECIMAL
+                            - TIMESTAMP
+                            - DATE
+                            - STRING
+                            - CHAR
+                            - VARCHAR
+                            - BOOLEAN
+                            - ARRAY
+                      allOf:
+                        - if:
+                            properties:
+                              arrayDataType:
+                                oneOf:
+                                  - const: VARCHAR
+                                  - const: CHAR
+                          then:
+                            properties:
+                              dataLength:
+                                title: Column Length
+                                type: integer
+                                description: Maximum length of column row
+                                default: 65535
+                            required:
+                              - dataLength
+                        - if:
+                            properties:
+                              arrayDataType:
+                                oneOf:
+                                  - const: DECIMAL
+                          then:
+                            properties:
+                              precision:
+                                title: Precision
+                                type: integer
+                                description: Precision of the numeric data type
+                                minimum: 1
+                                maximum: 38
+                                default: 38
+                              scale:
+                                title: Scale
+                                type: integer
+                                description: Scale of the numeric data type; cannot be greater than precision minus 1
+                                minimum: 0
+                                maximum: 37
+                                default: 0
+                            required:
+                              - precision
+                              - scale
+                  - if:
+                      properties:
+                        dataType:
+                          oneOf:
+                            - const: VARCHAR
+                            - const: CHAR
+                    then:
+                      properties:
+                        dataLength:
+                          title: Column Length
+                          type: integer
+                          description: Maximum length of column row
+                          default: 65535
+                      required:
+                        - dataLength
+                  - if:
+                      properties:
+                        dataType:
+                          oneOf:
+                            - const: DECIMAL
+                    then:
+                      properties:
+                        precision:
+                          title: Precision
+                          type: integer
+                          description: Precision of the numeric data type
+                          minimum: 1
+                          maximum: 38
+                          default: 38
+                        scale:
+                          title: Scale
+                          type: integer
+                          description: Scale of the numeric data type; cannot be greater than precision minus 1
+                          minimum: 0
+                          maximum: 37
+                          default: 0
+                      required:
+                        - precision
+                        - scale
+
+    - title: Output port deployment information
+      required:
+        - sourceTableName
+      description: |-
+        The Output Port will create an Athena view based on the specified source table. 
+
+        The source database is the internal database of the Data Product, created with the following naming convention: **'domain_environment_dataProduct_vDataProductMajorVersion_internal'**.
+        
+        If the internal database of the Data Product does not exist, it will be automatically created. 
+        Similarly, if the source table is not present, it will be generated within the database, using the schema defined in the **Data Contract** section.
+      
+        This configuration can be modified later in the **Edit** section.
+      properties:
+        sourceTableName:
+          title: Source Table Name
+          type: string
+          default: source_table
+          description: Name of the source table that will be used to create the Output Port view.
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: '.'
+        values:
+          name: '${{ parameters.name }}'
+          domainName: '${{ parameters.domainName }}'
+          dataproductName: '${{ parameters.dataproductName }}'
+          description: '${{ parameters.description }}'
+          domain: '${{ parameters.domain }}'
+          dataproduct: '${{ parameters.dataproduct }}'
+          identifier: '${{ parameters.identifier }}'
+          developmentGroup: '${{ parameters.developmentGroup }}'
+          storageArea: '${{ parameters.storageArea }}'
+          dependsOn: '${{ parameters.dependsOn }}'
+          schemaColumns: '${{ parameters.schemaDefinition.schemaColumns }}'
+          sourceTableName: '${{ parameters.sourceTableName }}'
+          catalog: AWSDataCatalog
+          creationDate: '${{ parameters.creationDate }}'
+          useCaseTemplateId: urn:dmb:utm:aws-athena-template:0.0.0
+          useCaseTemplateVersion: 0.0.0
+          infrastructureTemplateId: urn:dmb:itm:aws-athena-tech-adapter:0
+          destination: &destination 'gitlab.com?owner=AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
+          displayName: '${{ parameters.displayName }}'
+          owner: 'AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
+          repo: '${{ parameters.name.split(" ") | join("") | lower }}'
+          artifact_id: '${{ parameters.name }}'
+
+    - id: publish
+      name: Publish
+      action: witboostMeshComponent:publish:gitlab
+      input:
+        allowedHosts: ['gitlab.com']
+        description: 'This is ${{ parameters.name }}'
+        repoUrl: *destination
+        rootDirectory: '.'
+        dataproduct: '${{ parameters.dataproduct }}'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: '${{ steps.publish.output.repoContentsUrl }}'
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: '${{ steps.publish.output.remoteUrl }}'
+      - title: Open in catalog
+        icon: catalog
+        entityRef: '${{ steps.register.output.entityRef }}'
