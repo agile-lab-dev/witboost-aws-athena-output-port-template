@@ -37,6 +37,7 @@ spec:
         {% if values.storageArea not in ComponentDependencies %}
         - ${{ values.storageArea }}
         {% endif %}
+    platform: AWS
     technology: Athena
     outputPortType: View
     creationDate: ${{ values.creationDate }}
