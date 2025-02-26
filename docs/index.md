@@ -33,18 +33,44 @@ This section includes the basic information that any Component of Witboost must 
 
 ### Data Contract Schema
 
-This section defines the columns of the table. Primitive data types supported.
+This section defines the schema of the data that will be exposed through the Athena view.
 
-- **Column Definitions**: Defines the schema of the Athena view, specifying column names, descriptions, data types, and constraints.
+- **Table Format**: Specifies the table format to use. Currently, only `ICEBERG` is supported.
+- **Column Definitions**: Defines the schema for the Athena view, including column names, descriptions, and data types. If the source table does not exist, this schema will also be used to create it.
 
 *Example:*
 
-| **Column Name** | **Description**      | **Data Type** | **Constraint** |
-|-----------------|----------------------|---------------|----------------|
-| id              | Unique identifier    | INT           | PRIMARY_KEY    |
-| name            | Name of the entity   | STRING        | NOT_NULL       |
-| created_at      | Creation timestamp   | TIMESTAMP     |                |
-| status          | Status of the record | VARCHAR       |                |
+| **Column Name** | **Description**      | **Data Type** | 
+|-----------------|----------------------|---------------|
+| id              | Unique identifier    | INT           | 
+| name            | Name of the entity   | STRING        | 
+| created_at      | Creation timestamp   | TIMESTAMP     |
+| status          | Status of the record | VARCHAR       |
+
+### Supported Data Types
+
+The table below lists the data types and their support status.
+
+| **Data Type** | **ICEBERG Support** |
+|---------------|---------------------|
+| BOOLEAN       | ✅                   |
+| TINYINT       | ❌                   |
+| SMALLINT      | ❌                   |
+| INT           | ✅                   |
+| BIGINT        | ✅                   |
+| DOUBLE        | ✅                   |
+| FLOAT         | ✅                   |
+| DECIMAL       | ✅                   |
+| CHAR          | ❌                   |
+| VARCHAR       | ❌                   |
+| STRING        | ✅                   |
+| BINARY        | ✅                   |
+| DATE          | ✅                   |
+| TIMESTAMP     | ✅                   |
+| TIMESTAMPTZ   | ✅                   |
+| ARRAY         | ✅                   |
+| MAP           | ✅                   |
+
 
 ### Output Port Deployment Information
 
