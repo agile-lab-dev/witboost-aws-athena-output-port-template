@@ -55,18 +55,77 @@ spec:
       {%- if column.constraint and column.constraint != "(no constraint)" %}
           constraint: ${{ column.constraint }}
       {%- endif %}
-      {%- if primitiveType in ["VARCHAR", "CHAR"] and column.dataLength %}
+      {%- if primitiveType in ["VARCHAR", "CHAR"] and column.dataLength >=0 %}
           dataLength: ${{ column.dataLength }}
       {%- endif %}
-      {%- if primitiveType == "DECIMAL" and column.precision %}
+      {%- if primitiveType == "DECIMAL" and column.precision >=0 %}
           precision: ${{ column.precision }}
       {%- endif %}
-      {%- if primitiveType == "DECIMAL" and column.scale %}
+      {%- if primitiveType == "DECIMAL" and column.scale >= 0 %}
           scale: ${{ column.scale }}
       {%- endif %}
+
       {%- if column.dataType == "ARRAY" and column.arrayDataType %}
           arrayDataType: ${{ column.arrayDataType }}
+        {%- if column.arrayDataType == "ARRAY" and column.nestedArrayDataType %}
+          nestedArrayDataType: ${{column.nestedArrayDataType}}
+          {%- if column.nestedArrayDataType == "DECIMAL" and column.nestedScale >= 0 %}
+          nestedScale: ${{column.nestedScale}}
+          {%- endif %}
+          {%- if column.nestedArrayDataType == "DECIMAL" and column.nestedPrecision >=0 %}
+          nestedPrecision: ${{column.nestedPrecision}}
+          {%- endif %}
+          {%- if column.nestedArrayDataType in ["VARCHAR", "CHAR"] and column.nestedDataLength >=0 %}
+          nestedDataLength: ${{column.nestedDataLength}}
+          {%- endif %}
+        {%- endif %}
+        {%- if column.arrayDataType == "MAP" and column.arrayMapKeyType and column.arrayMapValueType %}
+          arrayMapKeyType: ${{column.arrayMapKeyType}}
+          arrayMapValueType: ${{column.arrayMapValueType}}
+          {%- if column.arrayMapKeyType == "DECIMAL" and column.arrayMapKeyScale >= 0 %}
+          arrayMapKeyScale: ${{column.arrayMapKeyScale}}
+          {%- endif %}
+          {%- if column.arrayMapKeyType == "DECIMAL" and column.arrayMapKeyPrecision >=0 %}
+          arrayMapKeyPrecision: ${{column.arrayMapKeyPrecision}}
+          {%- endif %}
+          {%- if column.arrayMapKeyType in ["VARCHAR", "CHAR"] and column.arrayMapKeyDataLength >=0 %}
+          arrayMapKeyDataLength: ${{column.arrayMapKeyDataLength}}
+          {%- endif %}
+          {%- if column.arrayMapValueType == "DECIMAL" and column.arrayMapValueScale >= 0 %}
+          arrayMapValueScale: ${{column.arrayMapValueScale}}
+          {%- endif %}
+          {%- if column.arrayMapValueType == "DECIMAL" and column.arrayMapValuePrecision >=0 %}
+          arrayMapValuePrecision: ${{column.arrayMapValuePrecision}}
+          {%- endif %}
+          {%- if column.arrayMapValueType in ["VARCHAR", "CHAR"] and column.arrayMapValueDataLength >=0 %}
+          arrayMapValueDataLength: ${{column.arrayMapValueDataLength}}
+          {%- endif %}
+        {%- endif %}
       {%- endif %}
+
+      {%- if column.dataType == "MAP" and column.mapKeyType and column.mapValueType %}
+          mapKeyType: ${{column.mapKeyType}}
+          mapValueType: ${{column.mapValueType}}
+          {%- if column.mapKeyType in ["VARCHAR", "CHAR"] and column.mapKeyDataLength >=0 %}
+          mapKeyDataLength: ${{column.mapKeyDataLength}}
+          {%- endif %}
+          {%- if column.mapValueType in ["VARCHAR", "CHAR"] and column.mapValueDataLength >=0 %}
+          mapValueDataLength: ${{column.mapValueDataLength}}
+          {%- endif %}
+          {%- if column.mapKeyType == "DECIMAL" and column.mapKeyPrecision >=0 %}
+          mapKeyPrecision: ${{column.mapKeyPrecision}}
+          {%- endif %}
+          {%- if column.mapValueType == "DECIMAL" and column.mapValuePrecision >=0 %}
+          mapValuePrecision: ${{column.mapValuePrecision}}
+          {%- endif %}
+          {%- if column.mapKeyType == "DECIMAL" and column.mapKeyScale >= 0 %}
+          mapKeyScale: ${{column.mapKeyScale}}
+          {%- endif %}
+          {%- if column.mapValueType == "DECIMAL" and column.mapValueScale >= 0 %}
+          mapValueScale: ${{column.mapValueScale}}
+          {%- endif %}
+      {%- endif %}
+
           tags: {% if column.businessTerms | length > 0 %}{% for i in column.businessTerms %}
             - tagFQN: ${{ i }}
               source: Glossary
@@ -97,6 +156,7 @@ spec:
         catalog: ${{ values.catalog | dump }}
         database: IGNORED
         name: ${{ values.sourceTableName | dump }}
+        tableFormat: ${{ values.tableFormat | dump }}
       view:
         catalog: ${{ values.catalog | dump }}
         database: IGNORED

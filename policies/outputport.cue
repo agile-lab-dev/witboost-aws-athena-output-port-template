@@ -8,8 +8,9 @@ let majorVersion = splits[5]
 #Id:               string & =~"^[a-zA-Z0-9:._\\-]+$"
 #ComponentId:      #Id & =~"^urn:dmb:cmp:\(domain):[a-zA-Z0-9_\\-]+:\(majorVersion):[a-zA-Z0-9_\\-]+$"
 #AWSRegion: string & =~"(?i)^(eu-west-1|eu-west-2|eu-west-3|eu-central-1|eu-north-1|eu-south-1|eu-south-2|eu-central-2)$"
+#TableFormat: string & =~"(?i)^(ICEBERG)$"
 
-#OM_DataType: string & =~"(?i)^(TINYINT|SMALLINT|INT|BIGINT|DOUBLE|DECIMAL|TIMESTAMP|DATE|STRING|CHAR|VARCHAR|BOOLEAN|ARRAY)$"
+#OM_DataType: string & =~"(?i)^(BOOLEAN|TINYINT|SMALLINT|INT|BIGINT|DOUBLE|FLOAT|DECIMAL|CHAR|VARCHAR|STRING|BINARY|DATE|TIMESTAMP|TIMESTAMPTZ|ARRAY|MAP)$"
 #URL:         string & =~"^https?://[a-zA-Z0-9@:%._~#=&/?]*$"
 #OM_Tag: {
 	tagFQN!:       string
@@ -66,7 +67,14 @@ let majorVersion = splits[5]
 	...
 }
 
-#TableSpecific: {
+#SourceTableSpecific: {
+	catalog!: string
+	database!: string
+	name!: string
+	tableFormat!: #TableFormat
+}
+
+#ViewSpecific: {
 	catalog!: string
 	database!: string
 	name!: string
@@ -89,7 +97,7 @@ dataSharingAgreement: #DataSharingAgreement
 tags: [...#OM_Tag]
 specific: {
 	storageAreaId!: #ComponentId
-	sourceTable!: #TableSpecific
-	view!: #TableSpecific
+	sourceTable!: #SourceTableSpecific
+	view!: #ViewSpecific
 }
 

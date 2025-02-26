@@ -92,7 +92,7 @@ spec:
           title: Dependencies
           type: array
           description: A component could depend on other components in the same Data Product. This information will be used to deploy the components in such an order that their dependencies already exist.
-          default: [ ]
+          default: []
           items:
             type: string
             ui:field: EntityRelationsPicker
@@ -184,17 +184,34 @@ spec:
 
     - title: Data contract schema
       description: |-
-        
+
         Define the schema of the Output Port view. Primitive data types supported.
 
         The **Data Contract** schema specifies the structure of the data that will be exposed through the Output Port.  
         This schema will serve two purposes:
-        
+
         1. **Athena View Generation**: The Output Port will create an Athena view with the exact columns defined in this schema. If no columns are defined the view will include all the columns of the source table.
         2. **Source Table Creation (if needed)**: If the source table does not exist in the source database, it will be automatically created using this schema.
 
         The Data Contract ensures consistency and enforces a predefined structure.
+
+        You can modify the Data Contract later in the **Edit** section.
       properties:
+        tableFormat:
+          type: string
+          title: Table format
+          ui:disabled: true
+
+        warning:
+          type: "null"
+          description: "**Attention!** In the following table, you must select the **Athena type** corresponding to the type of the selected table format.
+           [Supported data types for Iceberg tables in Athena](https://docs.aws.amazon.com/athena/latest/ug/querying-iceberg-supported-data-types.html)
+           If you select a data type that is not supported by the selected table format, the validation of this component will fail."
+
+        nestingWarning:
+          type: "null"
+          description: "**Nested structures** are supported only up to **2 levels**. If deeper nesting is required, it must be manually configured in `catalog-info.yml`."
+
         schemaDefinition:
           type: object
           ui:options:
@@ -222,28 +239,23 @@ spec:
                     default: INT
                     title: Data Type
                     enum:
+                      - BOOLEAN
                       - TINYINT
                       - SMALLINT
                       - INT
                       - BIGINT
                       - DOUBLE
+                      - FLOAT
                       - DECIMAL
-                      - TIMESTAMP
-                      - DATE
-                      - STRING
                       - CHAR
                       - VARCHAR
-                      - BOOLEAN
+                      - STRING
+                      - BINARY
+                      - DATE
+                      - TIMESTAMP
+                      - TIMESTAMPTZ
                       - ARRAY
-                  constraint:
-                    type: string
-                    title: Constraint
-                    default: (no constraint)
-                    enum:
-                      - PRIMARY_KEY
-                      - NOT_NULL
-                      - UNIQUE
-                      - (no constraint)
+                      - MAP
                 allOf:
                   - if:
                       properties:
@@ -259,19 +271,23 @@ spec:
                           type: string
                           default: INT
                           enum:
+                            - BOOLEAN
                             - TINYINT
                             - SMALLINT
                             - INT
                             - BIGINT
                             - DOUBLE
+                            - FLOAT
                             - DECIMAL
-                            - TIMESTAMP
-                            - DATE
-                            - STRING
                             - CHAR
                             - VARCHAR
-                            - BOOLEAN
+                            - STRING
+                            - BINARY
+                            - DATE
+                            - TIMESTAMP
+                            - TIMESTAMPTZ
                             - ARRAY
+                            - MAP
                       allOf:
                         - if:
                             properties:
@@ -288,6 +304,138 @@ spec:
                                 default: 65535
                             required:
                               - dataLength
+                        - if:
+                            properties:
+                              arrayDataType:
+                                oneOf:
+                                  - const: MAP
+                          then:
+                            properties:
+                              arrayMapKeyType:
+                                title: Array Map Key Data Type
+                                description: Data type of the inner array elements
+                                type: string
+                                default: INT
+                                enum:
+                                  - BOOLEAN
+                                  - TINYINT
+                                  - SMALLINT
+                                  - INT
+                                  - BIGINT
+                                  - DOUBLE
+                                  - FLOAT
+                                  - DECIMAL
+                                  - CHAR
+                                  - VARCHAR
+                                  - STRING
+                                  - BINARY
+                                  - DATE
+                                  - TIMESTAMP
+                                  - TIMESTAMPTZ
+                              arrayMapValueType:
+                                title: Array Map Value Data Type
+                                description: Data type of the inner array elements
+                                type: string
+                                default: INT
+                                enum:
+                                  - BOOLEAN
+                                  - TINYINT
+                                  - SMALLINT
+                                  - INT
+                                  - BIGINT
+                                  - DOUBLE
+                                  - FLOAT
+                                  - DECIMAL
+                                  - CHAR
+                                  - VARCHAR
+                                  - STRING
+                                  - BINARY
+                                  - DATE
+                                  - TIMESTAMP
+                                  - TIMESTAMPTZ
+
+                            allOf:
+                              - if:
+                                  properties:
+                                    arrayMapKeyType:
+                                      oneOf:
+                                        - const: CHAR
+                                        - const: VARCHAR
+                                then:
+                                  properties:
+                                    arrayMapKeyDataLength:
+                                      title: Array Map Key Data Length
+                                      type: integer
+                                      description: Maximum length for the Array Map Key CHAR/VARCHAR type.
+                                      default: 65535
+                                  required:
+                                    - arrayMapKeyDataLength
+                              - if:
+                                  properties:
+                                    arrayMapKeyType:
+                                      const: DECIMAL
+                                then:
+                                  properties:
+                                    arrayMapKeyPrecision:
+                                      title: Array Map Key Decimal Precision
+                                      type: integer
+                                      description: Precision for the Array Map Key DECIMAL type.
+                                      minimum: 1
+                                      maximum: 38
+                                      default: 38
+                                    arrayMapKeyScale:
+                                      title: Array Map Key Decimal Scale
+                                      type: integer
+                                      description: Scale for the Array Map Key DECIMAL type; cannot be greater than precision minus 1.
+                                      minimum: 0
+                                      maximum: 37
+                                      default: 0
+                                  required:
+                                    - arrayMapKeyPrecision
+                                    - arrayMapKeyScale
+                              - if:
+                                  properties:
+                                    arrayMapValueType:
+                                      oneOf:
+                                        - const: CHAR
+                                        - const: VARCHAR
+                                then:
+                                  properties:
+                                    arrayMapValueDataLength:
+                                      title: Array Map Value Data Length
+                                      type: integer
+                                      description: Maximum length for the Array Map Value CHAR/VARCHAR type.
+                                      default: 65535
+                                  required:
+                                    - arrayMapValueDataLength
+                              - if:
+                                  properties:
+                                    arrayMapValueType:
+                                      const: DECIMAL
+                                then:
+                                  properties:
+                                    arrayMapValuePrecision:
+                                      title: Array Map Value Decimal Precision
+                                      type: integer
+                                      description: Precision for the Array Map Value DECIMAL type.
+                                      minimum: 1
+                                      maximum: 38
+                                      default: 38
+                                    arrayMapValueScale:
+                                      title: Array Map Value Decimal Scale
+                                      type: integer
+                                      description: Scale for the Array Map Value DECIMAL type; cannot be greater than precision minus 1.
+                                      minimum: 0
+                                      maximum: 37
+                                      default: 0
+                                  required:
+                                    - arrayMapValuePrecision
+                                    - arrayMapValueScale
+
+                            required:
+                              - arrayMapKeyType
+                              - arrayMapValueType
+
                         - if:
                             properties:
                               arrayDataType:
@@ -312,6 +460,205 @@ spec:
                             required:
                               - precision
                               - scale
+
+                        - if:
+                            properties:
+                              arrayDataType:
+                                oneOf:
+                                  - const: ARRAY
+                          then:
+                            required:
+                              - nestedArrayDataType
+                            properties:
+                              nestedArrayDataType:
+                                title: Nested Array Data Type
+                                description: Data type of the inner array elements
+                                type: string
+                                default: INT
+                                enum:
+                                  - BOOLEAN
+                                  - TINYINT
+                                  - SMALLINT
+                                  - INT
+                                  - BIGINT
+                                  - DOUBLE
+                                  - FLOAT
+                                  - DECIMAL
+                                  - CHAR
+                                  - VARCHAR
+                                  - STRING
+                                  - BINARY
+                                  - DATE
+                                  - TIMESTAMP
+                                  - TIMESTAMPTZ
+                            allOf:
+                              - if:
+                                  properties:
+                                    nestedArrayDataType:
+                                      const: DECIMAL
+                                then:
+                                  properties:
+                                    nestedPrecision:
+                                      title: Nested Decimal Precision
+                                      type: integer
+                                      description: Precision for the nested DECIMAL type.
+                                      minimum: 1
+                                      maximum: 38
+                                      default: 38
+                                    nestedScale:
+                                      title: Nested Decimal Scale
+                                      type: integer
+                                      description: Scale for the nested DECIMAL type; cannot be greater than precision minus 1.
+                                      minimum: 0
+                                      maximum: 37
+                                      default: 0
+                                  required:
+                                    - nestedPrecision
+                                    - nestedScale
+                              - if:
+                                  properties:
+                                    nestedArrayDataType:
+                                      oneOf:
+                                        - const: CHAR
+                                        - const: VARCHAR
+                                then:
+                                  properties:
+                                    nestedDataLength:
+                                      title: Nested Data Length
+                                      type: integer
+                                      description: Maximum length for the nested CHAR/VARCHAR type.
+                                      default: 65535
+                                  required:
+                                    - nestedDataLength
+                  - if:
+                      properties:
+                        dataType:
+                          const: MAP
+                    then:
+                      required:
+                        - mapKeyType
+                        - mapValueType
+                      properties:
+                        mapKeyType:
+                          title: Key Type
+                          type: string
+                          description: Data type of the map keys
+                          default: INT
+                          enum:
+                            - BOOLEAN
+                            - TINYINT
+                            - SMALLINT
+                            - INT
+                            - BIGINT
+                            - DOUBLE
+                            - FLOAT
+                            - DECIMAL
+                            - CHAR
+                            - VARCHAR
+                            - STRING
+                            - BINARY
+                            - DATE
+                            - TIMESTAMP
+                            - TIMESTAMPTZ
+                        mapValueType:
+                          title: Value Type
+                          type: string
+                          description: Data type of the map values
+                          default: INT
+                          enum:
+                            - BOOLEAN
+                            - TINYINT
+                            - SMALLINT
+                            - INT
+                            - BIGINT
+                            - DOUBLE
+                            - FLOAT
+                            - DECIMAL
+                            - CHAR
+                            - VARCHAR
+                            - STRING
+                            - BINARY
+                            - DATE
+                            - TIMESTAMP
+                            - TIMESTAMPTZ
+                      allOf:
+                        - if:
+                            properties:
+                              mapKeyType:
+                                oneOf:
+                                  - const: CHAR
+                                  - const: VARCHAR
+                          then:
+                            properties:
+                              mapKeyDataLength:
+                                title: Map Key Data Length
+                                type: integer
+                                description: Maximum length for the map key CHAR/VARCHAR type.
+                                default: 65535
+                            required:
+                              - mapKeyDataLength
+                        - if:
+                            properties:
+                              mapKeyType:
+                                const: DECIMAL
+                          then:
+                            properties:
+                              mapKeyPrecision:
+                                title: Map Key Decimal Precision
+                                type: integer
+                                description: Precision for the map key DECIMAL type.
+                                minimum: 1
+                                maximum: 38
+                                default: 38
+                              mapKeyScale:
+                                title: Map Key Decimal Scale
+                                type: integer
+                                description: Scale for the map key DECIMAL type; cannot be greater than precision minus 1.
+                                minimum: 0
+                                maximum: 37
+                                default: 0
+                            required:
+                              - mapKeyPrecision
+                              - mapKeyScale
+                        - if:
+                            properties:
+                              mapValueType:
+                                oneOf:
+                                  - const: CHAR
+                                  - const: VARCHAR
+                          then:
+                            properties:
+                              mapValueDataLength:
+                                title: Map Value Data Length
+                                type: integer
+                                description: Maximum length for the map value CHAR/VARCHAR type.
+                                default: 65535
+                            required:
+                              - mapValueDataLength
+                        - if:
+                            properties:
+                              mapValueType:
+                                const: DECIMAL
+                          then:
+                            properties:
+                              mapValuePrecision:
+                                title: Map Value Decimal Precision
+                                type: integer
+                                description: Precision for the map value DECIMAL type.
+                                minimum: 1
+                                maximum: 38
+                                default: 38
+                              mapValueScale:
+                                title: Map Value Decimal Scale
+                                type: integer
+                                description: Scale for the map value DECIMAL type; cannot be greater than precision minus 1.
+                                minimum: 0
+                                maximum: 37
+                                default: 0
+                            required:
+                              - mapValuePrecision
+                              - mapValueScale
+
                   - if:
                       properties:
                         dataType:
@@ -351,8 +698,26 @@ spec:
                       required:
                         - precision
                         - scale
-
-
+                  - if: true
+                    then:
+                      properties:
+                        businessTerms:
+                          title: Business Terms
+                          type: array
+                          description: Multiple selection for fixed tags
+                          uniqueItems: true
+                          ui:style:
+                            minWidth: 400
+                          items:
+                            type: string
+                            enum:
+                              - Raw
+                              - Derived
+                              - Metadata
+                              - Identifier
+                              - Dimension
+                              - Fact
+                        
     - title: Output port deployment information
       required:
         - sourceTableName
