@@ -71,6 +71,20 @@ The table below lists the data types and their support status.
 | ARRAY         | ✅                   |
 | MAP           | ✅                   |
 
+### Data Quality constraints
+This section allows you to add Sifflet monitors linked to the output port.
+Remember to also add a Sifflet workload to the Data Product, and to include this Output Port as a dependency in order to create the defined monitors on Sifflet.
+
+*Example:*
+
+| **Name**      | **Description**                   | **Severity** | **Monitor Type**    | **Null values** | **Field** | **Threshold** |
+|---------------|-----------------------------------|--------------|---------------------|-----------------|-----------|---------------|
+| Id Not Null   | Not null constraint for id column | Critical     | Nulls               | NullAndEmpty    | id        | 15%           |
+| Unique Name   | Unique name column                | Low          | Unique              | -               | name      | -             |
+| No changes    | Schema change monitor             | Moderate     | Schema change       | -               | -         | -             |
+| No duplicates | Duplicate rows                    | High         | Row level duplicate | -               | -         | 5%            |
+
+
 
 ### Output Port Deployment Information
 

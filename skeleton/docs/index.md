@@ -32,6 +32,7 @@ For other details about each column, please refer to this component `catalog-inf
 {%- endif %}
 
 
+
 ## Athena
 ### Source Table Details
 
@@ -49,6 +50,21 @@ For other details about each column, please refer to this component `catalog-inf
 | **Database**     | ${{ domainName }}_ENVIRONMENT_${{ dataProductName }}_v${{ dataProductMajorVersion }}_consumable |
 | **Name**         | ${{ componentName }}                                                                            |
 
+
+## Data Quality Checks
+
+{% if values.schemaColumns | length > 0 %}
+
+| Name | Description | Type | Severity | Field | Threshold |
+|:-----|:------------|:-----|:---------|:------|:----------|
+
+{%- for check in values.dataQuality %}
+| ${{ check.monitorName }}| ${{ check.description }} | ${{ check.severity }}|  {% if check.monitorKind == "Nulls" %} FieldNulls {% if check.nullValues == "Null, empty and whitespaces" %} (NullEmptyAndWhitespaces) {% elif check.nullValues == "Null and empty" %} (NullAndEmpty){% endif %}{% elif check.monitorKind == "Unique" %} FieldDuplicates {% elif check.monitorKind == "Schema change" %} SchemaChange {% elif check.monitorKind == "Row level duplicates" %} RowDuplicates {% else %} UnknownKind {% endif %}  |   {% if check.monitorKind in ["Nulls", "Unique"] %} ${{ check.columnName.label | dump }} {% else %} "-" {% endif %} | {% if check.monitorKind in ["Nulls", "Row level duplicates"] %} ${{ check.threshold }}% {% else %} "-" {% endif %} |
+{%- endfor %}
+
+{% else %}
+No data quality checks configured.
+{% endif %}
 
 ## Deployment details 
 

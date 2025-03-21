@@ -717,7 +717,121 @@ spec:
                               - Identifier
                               - Dimension
                               - Fact
-                        
+
+
+    - title: Data quality
+      description: |-
+        Sifflet monitors enable you to apply quality criteria on top of your table/fields based on chosen variables. Here you can define multiple monitors, based on the defined schema.
+
+        If you add data quality constraints, **remember to also add to the Data Product a Sifflet workload and to include this output port as its dependency.**
+        
+        **Attention:** Updating a monitor, you will lose any monitoring history that is already present.
+      properties:
+        dataQuality:
+          title: Data quality constraints (Sifflet Monitors definition)
+          type: array
+          ui:ArrayFieldTemplate: ArrayTableTemplate
+          items:
+            type: object
+            ui:ObjectFieldTemplate: TableRowTemplate
+            required:
+              - monitorKind
+              - monitorName
+              - severity
+            properties:
+              properties:
+                monitorName:
+                  title: Monitor name
+                  type: string
+              monitorKind:
+                title: Monitor kind
+                type: string
+                default: Nulls
+                enum:
+                  - Nulls
+                  - Unique
+                  - 'Schema change'
+                  - 'Row level duplicates'
+              description:
+                title: Description
+                type: string
+              severity:
+                title: Severity
+                type: string
+                default: Low
+                enum:
+                  - Low
+                  - Moderate
+                  - High
+                  - Critical
+
+            allOf:
+              - if:
+                  properties:
+                    monitorKind:
+                      const: Nulls
+                then:
+                  required:
+                      - columnName
+                      - threshold
+                  properties:
+                    columnName:
+                      title: Column to monitor
+                      type: object
+                      ui:field: DescriptorPicker
+                      sourceType: field
+                      source: schemaDefinition
+                      optionsAt: schemaColumns
+                      optionsDisplayNameAt: name
+                      ui:options:
+                        allowArbitraryValues: false
+                    nullValues:
+                      title: Null values
+                      type: string
+                      description: "Operator for threshold comparison"
+                      enum:
+                        - 'Null'
+                        - 'Null and empty'
+                        - 'Null, empty and whitespaces'
+                    threshold:
+                      title: Threshold
+                      type: number
+                      description: "Threshold for null values in percentage"
+                      minimum: 0
+                      maximum: 100
+                      default: 0
+              - if:
+                  properties:
+                    monitorKind:
+                      const: Unique
+                then:
+                  required:
+                      - columnName
+                  properties:
+                    columnName:
+                      title: Column Name
+                      type: object
+                      ui:field: DescriptorPicker
+                      sourceType: field
+                      source: schemaDefinition
+                      optionsAt: schemaColumns
+                      optionsDisplayNameAt: name
+                      ui:options:
+                        allowArbitraryValues: false
+              - if:
+                  properties:
+                    monitorKind:
+                      const: 'Row level duplicates'
+                then:
+                  properties:
+                    threshold:
+                      title: Threshold
+                      type: number
+                      description: "Threshold for row level duplicates percentage"
+                      minimum: 0
+                      maximum: 100
+                      default: 0
+
     - title: Output port deployment information
       required:
         - sourceTableName
@@ -758,6 +872,7 @@ spec:
           termsAndConditions: '${{ parameters.termsAndConditions }}'
           endpoint: '${{ parameters.endpoint }}'
           schemaColumns: '${{ parameters.schemaDefinition.schemaColumns }}'
+          dataQuality: '${{parameters.dataQuality}}'
           purpose: '${{ parameters.purpose }}'
           billing: '${{ parameters.billing }}'
           security: '${{ parameters.security }}'

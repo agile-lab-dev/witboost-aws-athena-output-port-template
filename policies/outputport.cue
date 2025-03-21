@@ -22,6 +22,40 @@ let majorVersion = splits[5]
 	...
 }
 
+#QualityCheck: {
+  type!: "custom"
+  engine!: "sifflet"
+  implementation!: {
+    name!: string
+    description?: string | null
+    schedule?: string | null
+    scheduleTimezone?: string | null
+    incident!: {
+      severity!: "Critical" | "High" | "Moderate" | "Low"
+      createOnFailure!: bool
+    }
+    parameters!: #QualityParameters
+  }
+}
+
+#QualityParameters: {
+  kind!: "FieldNulls" | "FieldDuplicates" | "SchemaChange" | "RowDuplicates"
+  if kind =~ "(?i)^(FieldNulls)$"{
+  	  nullValues?: null | "NullAndEmpty" | "NullEmptyAndWhitespaces"
+  }
+  if kind =~ "(?i)^(FieldNulls|FieldDuplicates)$"{
+  	    field!: string
+  }
+  if kind =~"(?i)^(FieldNulls|RowDuplicates)$"{
+			threshold!: {
+				kind!: "Static"
+				valueMode!: "Percentage"
+				max!: string & =~"^(100|[1-9]?[0-9])%$"
+			}
+  }
+  ...
+}
+
 #OM_Column: {
 	name!:        string
 	dataType!:    #OM_DataType
@@ -53,6 +87,7 @@ let majorVersion = splits[5]
 	}
 	termsAndConditions?: string | null
 	endpoint?:           #URL | null
+	quality?: [...#QualityCheck]
 	...
 }
 
