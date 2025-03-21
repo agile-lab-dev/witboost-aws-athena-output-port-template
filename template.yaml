@@ -655,6 +655,118 @@ spec:
                               - Dimension
                               - Fact
 
+    - title: Data quality
+      description: |-
+        Sifflet monitors enable you to apply quality criteria on top of your table/fields based on chosen variables. Here you can define multiple monitors, based on the defined schema.
+
+        If you add data quality constraints, **remember to also add to the Data Product a Sifflet workload and to include this output port as its dependency.**
+      properties:
+        dataQuality:
+          title: Sifflet Monitors
+          type: array
+          ui:ArrayFieldTemplate: ArrayTableTemplate
+          items:
+            type: object
+            ui:ObjectFieldTemplate: TableRowTemplate
+            required:
+              - monitorKind
+              - monitorName
+              - severity
+            properties:
+              monitorName:
+                title: Monitor name
+                type: string
+              monitorKind:
+                title: Monitor kind
+                type: string
+                default: Nulls
+                enum:
+                  - Nulls
+                  - Unique
+                  - 'Schema change'
+                  - 'Row level duplicates' 
+              description:
+                title: Description
+                type: string
+              severity:
+                title: Severity
+                type: string
+                default: Low
+                enum:
+                  - Low
+                  - Moderate
+                  - High
+                  - Critical
+            
+            allOf:
+              - if:
+                  properties:
+                    monitorKind:
+                      const: Nulls
+                then:
+                  required:
+                      - columnName
+                      - threshold
+                  properties:
+                    columnName:
+                      title: Column to monitor *
+                      type: object
+                      ui:field: DescriptorPicker
+                      sourceType: field
+                      source: schemaDefinition
+                      optionsAt: schemaColumns
+                      optionsDisplayNameAt: name
+                      ui:options:
+                        allowArbitraryValues: false
+                    nullValues:
+                      title: Null values
+                      type: string
+                      description: "What is considered as null?"
+                      enum:
+                        - 'Null'
+                        - 'Null and empty'
+                        - 'Null, empty and whitespaces'
+                    threshold:
+                      title: Threshold *
+                      type: number
+                      description: "Max threshold in percentage"
+                      minimum: 0
+                      maximum: 100
+                      default: 0
+              - if:
+                  properties:
+                    monitorKind:
+                      const: Unique
+                then:
+                  required:
+                      - columnName
+                  properties:
+                    columnName:
+                      title: Column Name *
+                      type: object
+                      ui:field: DescriptorPicker
+                      sourceType: field
+                      source: schemaDefinition
+                      optionsAt: schemaColumns
+                      optionsDisplayNameAt: name
+                      ui:options:
+                        allowArbitraryValues: false
+              - if:
+                  properties:
+                    monitorKind:
+                      const: 'Row level duplicates' 
+                then:
+                  required:
+                    - threshold
+                  properties:
+                    threshold:
+                      title: Threshold *
+                      type: number
+                      description: "Max threshold in percentage"
+                      minimum: 0
+                      maximum: 100
+                      default: 0
+
     - title: Output port deployment information
       required:
         - sourceTableName
@@ -673,6 +785,7 @@ spec:
           type: string
           default: source_table
           description: Name of the source table that will be used to create the Output Port view.
+
 
   steps:
     - id: template
@@ -693,6 +806,7 @@ spec:
           storageArea: '${{ parameters.storageArea }}'
           dependsOn: '${{ parameters.dependsOn }}'
           schemaColumns: '${{ parameters.schemaDefinition.schemaColumns }}'
+          dataQuality: '${{parameters.dataQuality}}'
           sourceTableName: '${{ parameters.sourceTableName }}'
           tableFormat: '${{ parameters.tableFormat }}'
           catalog: AWSDataCatalog
@@ -700,11 +814,14 @@ spec:
           useCaseTemplateId: urn:dmb:utm:aws-athena-template:0.0.0
           useCaseTemplateVersion: 0.0.0
           infrastructureTemplateId: urn:dmb:itm:aws-athena-tech-adapter:0
-          destination: &destination 'gitlab.com?owner=AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
+          destination: &destination 'gitlab.com?owner=AgileFactory%2FWitboost.Mesh%2Fiac%2Fqa%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
+          #          destination: &destination 'gitlab.com?owner=AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
           displayName: '${{ parameters.displayName }}'
-          owner: 'AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
+          owner: 'AgileFactory/Witboost.Mesh/iac/qa/mesh.repository/${{ parameters.domain | replace(r/domain:| |-/, "") }}/${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
+          #          owner: 'AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
           repo: '${{ parameters.name.split(" ") | join("") | lower }}'
           artifact_id: '${{ parameters.name }}'
+
 
     - id: publish
       name: Publish
