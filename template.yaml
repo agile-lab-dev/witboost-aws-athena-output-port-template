@@ -721,7 +721,7 @@ spec:
                     nullValues:
                       title: Null values
                       type: string
-                      description: "What is considered as null?"
+                      description: "Select an option different from ‘Null’ only if the column is a ‘STRING’."
                       enum:
                         - 'Null'
                         - 'Null and empty'
@@ -814,11 +814,9 @@ spec:
           useCaseTemplateId: urn:dmb:utm:aws-athena-template:0.0.0
           useCaseTemplateVersion: 0.0.0
           infrastructureTemplateId: urn:dmb:itm:aws-athena-tech-adapter:0
-          destination: &destination 'gitlab.com?owner=AgileFactory%2FWitboost.Mesh%2Fiac%2Fqa%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
-          #          destination: &destination 'gitlab.com?owner=AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
+          destination: &destination 'gitlab.com?owner=AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}&repo=${{ parameters.name.split(" ") | join("") | lower }}'
           displayName: '${{ parameters.displayName }}'
-          owner: 'AgileFactory/Witboost.Mesh/iac/qa/mesh.repository/${{ parameters.domain | replace(r/domain:| |-/, "") }}/${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
-          #          owner: 'AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
+          owner: 'AgileDMBSandbox%2F${{orgname}}%2Fmesh.repository%2F${{ parameters.domain | replace(r/domain:| |-/, "") }}%2F${{ parameters.dataproduct.split(".")[1] | replace(r/ |-/g, "") }}'
           repo: '${{ parameters.name.split(" ") | join("") | lower }}'
           artifact_id: '${{ parameters.name }}'
 
