@@ -739,10 +739,9 @@ spec:
               - monitorName
               - severity
             properties:
-              properties:
-                monitorName:
-                  title: Monitor name
-                  type: string
+              monitorName:
+                title: Monitor name
+                type: string
               monitorKind:
                 title: Monitor kind
                 type: string
@@ -788,7 +787,7 @@ spec:
                     nullValues:
                       title: Null values
                       type: string
-                      description: "Operator for threshold comparison"
+                      description: "Select an option different from ‘Null’ only if the column is a ‘STRING’."
                       enum:
                         - 'Null'
                         - 'Null and empty'

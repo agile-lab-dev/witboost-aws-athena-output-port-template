@@ -1,4 +1,5 @@
 import "strings"
+import "list"
 
 let splits = strings.Split(id, ":")
 let domain = splits[3]
@@ -41,7 +42,7 @@ let majorVersion = splits[5]
 #QualityParameters: {
   kind!: "FieldNulls" | "FieldDuplicates" | "SchemaChange" | "RowDuplicates"
   if kind =~ "(?i)^(FieldNulls)$"{
-  	  nullValues?: null | "NullAndEmpty" | "NullEmptyAndWhitespaces"
+  	  nullValues?: "NullAndEmpty" | "NullEmptyAndWhitespaces"
   }
   if kind =~ "(?i)^(FieldNulls|FieldDuplicates)$"{
   	    field!: string
@@ -136,3 +137,21 @@ specific: {
 	view!: #ViewSpecific
 }
 
+
+checks: {
+stringColumns: [for row in dataContract.schema if row.dataType == "STRING" {
+		row.name
+	}]
+
+nullsAndEmptyMonitors: [for quality in dataContract.quality
+if quality.implementation.parameters.kind == "FieldNulls" && quality.implementation.parameters.nullValues != _|_  {
+					quality.implementation.parameters.field
+}]
+
+stringColumnList: list.FlattenN(stringColumns, -1)
+nullsAndEmptyList: list.FlattenN(nullsAndEmptyMonitors, -1)
+
+mismatchNull: [for monitor in nullsAndEmptyMonitors if !list.Contains(stringColumnList, monitor) {monitor}]
+checkNullAndEmptyOnlyStringColumns: len(mismatchNull) & <=0
+
+}
