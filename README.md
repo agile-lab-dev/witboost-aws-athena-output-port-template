@@ -37,7 +37,8 @@ To get information on how to use this template, refer to this [document](./docs/
 
 To verify the component before deploying it along with the Data Product, the component needs to be tested against a CUE Policy defined for [Athena Output Port](./policies/outputport.cue). This policy needs to be defined inside the **Governance** section of the Witboost Platform.
 
-For more information, please refer to the [official documentation](https://docs.witboost.com/docs/p1_user/p5_managing_policies/p5_1_overview).
+For more information, please refer to the [official documentation](https://docs.witboost.com/docs/p3_tech/p11_managing_policies/p11_1_overview/).
+
 
 ## License
 

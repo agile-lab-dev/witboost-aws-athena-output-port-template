@@ -4,7 +4,10 @@ This documentation describes the details and parameters required to create an At
 
 ### Prerequisites
 
-A Data Product should already exist in order to attach the new components to it.
+A `Data Product` must already exist in order to attach the new components to it.
+
+Additionally, an `AWS S3 Storage component` must be present and referenced as a dependency of the output port. This storage is required to store the results of Athena queries.
+Declaring the storage as a dependency ensures that components are provisioned in the correct order — with the storage being available before the output port is created.
 
 ### Component Basic Information
 
@@ -30,6 +33,7 @@ This section includes the basic information that any Component of Witboost must 
 | **Identifier**        | Will look something like this: *finance.trading.0.athena-output-port*                                  |
 | **Development Group** | Might look something like this: *group:datameshplatform* Depends on the Data Product development group |
 | **Storage Area**      | urn:dmb:cmp:finance:tradingdp:0:s3-storage-area                                                        |
+| **Depends on**      | \[urn:dmb:cmp:finance:tradingdp:0:s3-storage-area, urn:dmb:cmp:finance:tradingdp:0:glue-job-1\]        |
 
 ### Data Contract Schema
 
