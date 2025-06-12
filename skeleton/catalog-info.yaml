@@ -1,3 +1,4 @@
+%SKELETON
 {% set dataProductMajorVersion = values.identifier.split(".")[2] %}
 {% set dataProductName = values.dataproduct.split(".")[1] | replace(" ", "") | replace("-", "") %}
 {% set domainName = values.domain.split(":")[1] | replace(" ", "") | replace("-", "") %}
@@ -42,7 +43,7 @@ spec:
     outputPortType: View
     creationDate: ${{ values.creationDate }}
     startDate: ${{ values.creationDate }}
-    processDescription: ${{ values.processDescription | dump }}
+    processDescription: ${{ parameters.processDescription | dump }}
     dataContract:
       schema: {% if values.schemaColumns | length > 0 %}
       {% for column in values.schemaColumns %}
@@ -168,21 +169,26 @@ spec:
               {% endif %}
       {% endfor %}{% else %}[]{% endif %}
 
-      termsAndConditions: ${{ values.termsAndConditions | dump }}
-      endpoint: ${{ values.endpoint | dump }}
+      termsAndConditions: ${{ parameters.termsAndConditions | dump }}
+      endpoint: ${{ parameters.endpoint | dump }}
       SLA:
-        intervalOfChange: ${{ values.intervalOfChange }}
-        timeliness: ${{ values.timeliness }}
-        upTime: ${{ values.upTime }}
+        intervalOfChange: ${{ parameters.intervalOfChange }}
+        timeliness: ${{ parameters.timeliness }}
+        upTime: ${{ parameters.upTime }}
     dataSharingAgreement:
-      purpose: ${{ values.purpose | dump }}
-      billing: ${{ values.billing | dump }}
-      security: ${{ values.security | dump }}
-      intendedUsage: ${{ values.intendedUsage | dump }}
-      limitations: ${{ values.limitations | dump }}
-      lifeCycle: ${{ values.lifeCycle | dump }}
-      confidentiality: ${{ values.confidentiality | dump }}
-    tags: []
+      purpose: ${{ parameters.purpose | dump }}
+      billing: ${{ parameters.billing | dump }}
+      security: ${{ parameters.security | dump }}
+      intendedUsage: ${{ parameters.intendedUsage | dump }}
+      limitations: ${{ parameters.limitations | dump }}
+      lifeCycle: ${{ parameters.lifeCycle | dump }}
+      confidentiality: ${{ parameters.confidentiality | dump }}
+    tags: {% if parameters.tags | length > 0 %}{% for i in parameters.tags %}
+      - tagFQN: ${{ i }}
+        source: Glossary
+        labelType: Manual
+        state: Confirmed
+    {% endfor %}{% else %}[]{% endif %}
     sampleData: {}
     semanticLinking: []
     specific:

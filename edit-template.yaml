@@ -1,5 +1,5 @@
 # it is important to use this apiVersion
-apiVersion: witboost.com/v1
+apiVersion: witboost.com/v2
 kind: EditTemplate
 metadata:
   name: edit-outputport-athena
@@ -848,36 +848,3 @@ spec:
           description: Name of the source table that will be used to create the Output Port view.
 
 
-  steps:
-    - id: template
-      name: Fetch Skeleton + Template
-      action: fetch:template
-      input:
-        url: ./edit-skeleton
-        targetPath: '.'
-        values:
-          domain: '${{ parameters.domain }}'
-          dataproduct: '${{ parameters.dataproduct }}'
-          identifier: '${{ parameters.identifier }}'
-          description: '${{ parameters.description }}'
-          dependsOn: '${{ parameters.dependsOn }}'
-          developmentGroup: '${{ parameters.developmentGroup }}'
-          storageArea: '${{ parameters.storageArea }}'
-          tags: '${{ values.tags }}'
-          processDescription: '${{ parameters.processDescription }}'
-          intervalOfChange: '${{ parameters.intervalOfChange }}'
-          timeliness: '${{ parameters.timeliness }}'
-          upTime: '${{ parameters.upTime }}'
-          termsAndConditions: '${{ parameters.termsAndConditions }}'
-          endpoint: '${{ parameters.endpoint }}'
-          schemaColumns: '${{ parameters.schemaDefinition.schemaColumns }}'
-          dataQuality: '${{parameters.dataQuality}}'
-          purpose: '${{ parameters.purpose }}'
-          billing: '${{ parameters.billing }}'
-          security: '${{ parameters.security }}'
-          intendedUsage: '${{ parameters.intendedUsage }}'
-          limitations: '${{ parameters.limitations }}'
-          lifeCycle: '${{ parameters.lifeCycle }}'
-          confidentiality: '${{ parameters.confidentiality }}'
-          sourceTableName: '${{ parameters.sourceTableName }}'
-          creationDate: '${{ parameters.creationDate }}'
